@@ -82,6 +82,7 @@ class WorldPayTech_WorldPay_Model_PaymentHelper extends Mage_Paygate_Model_Autho
     public $__testMode;
     public $__accountID;
     public $__subAccountID;
+    public $__merchantpin;
     
     
     public function __construct() {
@@ -93,6 +94,7 @@ class WorldPayTech_WorldPay_Model_PaymentHelper extends Mage_Paygate_Model_Autho
           $storeId = Mage::app()->getStore()->getStoreId();
           $this->__debugMode = Mage::getStoreConfig('payment/worldpay/debug', $storeId);
           $this->__testMode = Mage::getStoreConfig('payment/worldpay/test', $storeId);
+          $this->__merchantpin = Mage::getStoreConfig('payment/worldpay/merchantpin', $storeId);
           
           if($this->__testMode==1)
           {

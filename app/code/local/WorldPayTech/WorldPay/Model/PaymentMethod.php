@@ -55,6 +55,7 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
             $fields = array(
                 "acctid" => $this->__accountID,
                 "subid" => $this->__subAccountID,
+                "merchantpin" => $this->__merchantpin,
                 "email" => $billingaddress->getData('email'),
                 "phone" => $billingaddress->getData('telephone'),
                 'ipaddress' => $_SERVER['REMOTE_ADDR'],
@@ -233,6 +234,7 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
                 "service" => "4",
                 "acctid" => $this->__accountID,
                 "subid" => $this->__subAccountID,
+                "merchantpin" => $this->__merchantpin,
                 "historykeyid" => $historyid,
                 "orderkeyid" => $order_id,
                 'amount' => $totals,
