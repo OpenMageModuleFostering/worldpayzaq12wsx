@@ -40,7 +40,14 @@ class WorldPayTech_WorldAch_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
                Mage::log("Payment Method assignData "); 
             return $this;
         }
-    public function authorize(Varien_Object $payment, $amount) {
+     public function authorize(Varien_Object $payment, $amount) {
+        
+        // this function is not in used /////
+        
+        
+    }
+    
+    public function capture(Varien_Object $payment, $amount) {
         $order = $payment->getOrder();
         try {
             Mage::log('WorldAch Authorize!');
@@ -146,12 +153,7 @@ class WorldPayTech_WorldAch_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
         return $this;
     }
    
-    public function capture(Varien_Object $payment, $amount) {
-        
-        // this function is not in used /////
-        
-        
-    }
+   
     public function validate()
     {
         /*
@@ -178,7 +180,7 @@ class WorldPayTech_WorldAch_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
             Mage::log('WorldPay Profile Refund!');
             
             
-                $temp_transaction_id=$payment->getLastTransId();
+                $temp_transaction_id=$payment->getLastTransId()."-";
                 $dash_pos = strpos($temp_transaction_id, "-");
                 $transaction_id=substr($temp_transaction_id,0,$dash_pos);
                 if($transaction_id=="")
@@ -277,19 +279,19 @@ class WorldPayTech_WorldAch_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
         return $this;
     }
 
-    public function cancel(Varien_Object $payment) {
+   public function cancel(Varien_Object $payment) {
 
         // void the order if canceled
+        
         Mage::log('Order: cancel!');
-
-        return $this;
+		Mage::throwException("Payment Could not be refund, Kindly use Refund Process Using CreditMemo");
     }
 
     public function void(Varien_Object $payment) {
 
 
         Mage::log('Order: void!');
-
+		Mage::throwException("Payment Could not be refund, Kindly use Refund Process Using CreditMemo");
         /* Whatever you call to void a payment in your gateway */
     }
 

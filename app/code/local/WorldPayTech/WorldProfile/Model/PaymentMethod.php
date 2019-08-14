@@ -24,10 +24,20 @@ class WorldPayTech_WorldProfile_Model_PaymentMethod extends WorldPayTech_WorldPa
      * In this function i charge credit card and mark order as completed
      */
     
-    public function authorize(Varien_Object $payment, $amount) {
+    
+     public function authorize(Varien_Object $payment, $amount) {
+        
+        // this function is not in used /////
+        
+          Mage::log('PrismProfile Authorize!');
+          
+    }
+    
+    
+    public function capture(Varien_Object $payment, $amount) {
         $order = $payment->getOrder();
         try {
-            Mage::log('PrismProfile Authorize!');
+            Mage::log('PrismProfile Capture!');
             
             $temp_profile_id=explode("-",$_REQUEST["payment"]["profile_id"]);
             $profile_id=$temp_profile_id[0];
@@ -115,12 +125,7 @@ class WorldPayTech_WorldProfile_Model_PaymentMethod extends WorldPayTech_WorldPa
         return $this;
     }
    
-    public function capture(Varien_Object $payment, $amount) {
-        
-        // this function is not in used /////
-        
-        
-    }
+   
     public function validate()
     {
         /*
@@ -147,7 +152,7 @@ class WorldPayTech_WorldProfile_Model_PaymentMethod extends WorldPayTech_WorldPa
             Mage::log('PrismPay Profile Refund!');
             
             
-                $temp_transaction_id=$payment->getLastTransId();
+                $temp_transaction_id=$payment->getLastTransId()."-";
                 $dash_pos = strpos($temp_transaction_id, "-");
                 $transaction_id=substr($temp_transaction_id,0,$dash_pos);
                 if($transaction_id=="")
@@ -246,22 +251,21 @@ class WorldPayTech_WorldProfile_Model_PaymentMethod extends WorldPayTech_WorldPa
         return $this;
     }
 
-    public function cancel(Varien_Object $payment) {
+     public function cancel(Varien_Object $payment) {
 
         // void the order if canceled
+        
         Mage::log('Order: cancel!');
-
-        return $this;
+		Mage::throwException("Payment Could not be refund, Kindly use Refund Process Using CreditMemo");
     }
 
     public function void(Varien_Object $payment) {
 
 
         Mage::log('Order: void!');
-
+		Mage::throwException("Payment Could not be refund, Kindly use Refund Process Using CreditMemo");
         /* Whatever you call to void a payment in your gateway */
     }
-
 }
 
 ?>

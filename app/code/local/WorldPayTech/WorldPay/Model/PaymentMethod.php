@@ -34,12 +34,21 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
      */
     
     public function authorize(Varien_Object $payment, $amount) {
+        
+        	 Mage::log('PrismPay CC Authorize!');
+           
+        // this function is not in used we charged customer credit card in authoriza function/////
+            return $this;
+    }
+
+    public function capture(Varien_Object $payment, $amount) {
+    
         $order = $payment->getOrder();
         try {
-            Mage::log('PrismPay CC Authorize!');
+            Mage::log('PrismPay CC Capture!');
             
             
-            $is_applyForProfileAdd=$_REQUEST["payment"]["add_profile"];
+            $is_applyForProfileAdd=@$_REQUEST["payment"]["add_profile"];
                 
                 
             
@@ -73,15 +82,18 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
                 'currencycode' => $order->getBaseCurrencyCode(),
             );
             
+            
+            //doing authorization
             if($is_applyForProfileAdd=="1")
             {
                 $fields["service"]=7;
-		$fields["profileactiontype"]=2;
-            }else
+				$fields["profileactiontype"]=2;
+            }
+            else
             {
                 $fields["service"]=2;
             }
-
+				
 
 
             $fields_string = "<?xml version=\"1.0\"?><interface_driver><trans_catalog><transaction name=\"creditcard\"><inputs>";
@@ -113,13 +125,15 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
         ob_end_clean();
         error_log($contents);
        
-        $orderId=$order->getId();
+        //$orderId=$order->getId();
         $transactionId=$outputs->historyid;
         if ($outputs->status == "Approved") {
+            
+            
             $this->setStore($payment->getOrder()->getStoreId());
             $payment->setStatus(self::STATUS_APPROVED);
             $payment->setAmount($amount);
-            $payment->setLastTransId($orderId);
+            $payment->setLastTransId($transactionId);
             
             //save profile id of customer in to database
             $transactionData=array(
@@ -138,49 +152,46 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
            
             	if(Mage::getSingleton('customer/session')->isLoggedIn()) {
             				//get customer id
-					$customerData = Mage::getSingleton('customer/session')->getCustomer();
-					$customer_id=$customerData->getId();
+						$customerData = Mage::getSingleton('customer/session')->getCustomer();
+						$customer_id=$customerData->getId();
 			
-					$connectionWrite = Mage::getSingleton('core/resource')->getConnection('core_write'); 
-					$connectionWrite->beginTransaction();
-                                        
-                                        //create customer profile table if not created
-                                        $createQuery="CREATE TABLE IF NOT EXISTS 'customer_profile' (
-                                                    'id' int(11) NOT NULL AUTO_INCREMENT,
-                                                    'customer_id' varchar(50) NOT NULL,
-                                                    'profile_id' varchar(50) NOT NULL,
-                                                    'last_4_digit' varchar(20) NOT NULL,
-                                                    PRIMARY KEY ('id')
-                                                  ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;";
-                                        //$results = $connectionWrite->fetchAll($createQuery);
-                                        
-                                        
-					$data = array();
-					$data['profile_id']= $outputs->userprofileid;
-					$data['last_4_digit']=$outputs->last4digits;
-					$data['customer_id']=$customer_id;
-					$connectionWrite->insert('customer_profile', $data);
-					$connectionWrite->commit();
-                                        
-                                        $transactionData['profile_id']= "".$outputs->userprofileid."";
-                                        $transactionData['last_4_digit']="".$outputs->last4digits."";
+						$connectionWrite = Mage::getSingleton('core/resource')->getConnection('core_write'); 
+						$connectionWrite->beginTransaction();
+										
+											//create customer profile table if not created
+											$createQuery="CREATE TABLE IF NOT EXISTS 'customer_profile' (
+														'id' int(11) NOT NULL AUTO_INCREMENT,
+														'customer_id' varchar(50) NOT NULL,
+														'profile_id' varchar(50) NOT NULL,
+														'last_4_digit' varchar(20) NOT NULL,
+														PRIMARY KEY ('id')
+													  ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;";
+											//$results = $connectionWrite->fetchAll($createQuery);
+										
+										
+						$data = array();
+						$data['profile_id']= $outputs->userprofileid;
+						$data['last_4_digit']=$outputs->last4digits;
+						$data['customer_id']=$customer_id;
+						$connectionWrite->insert('customer_profile', $data);
+						$connectionWrite->commit();
+										
+						$transactionData['profile_id']= "".$outputs->userprofileid."";
+						$transactionData['last_4_digit']="".$outputs->last4digits."";
                                     
-                        }
+                    }
             
                }
-               
             $payment->setTransactionId($transactionId);
             $payment->setIsTransactionClosed(0);
             $payment->setParentTransactionId($transactionId);
             $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, $transactionData);
             
-            
-    
     
         } else {
             $payment->setStatus(self::STATUS_ERROR);
             $payment->setAmount($amount);
-            $payment->setLastTransId($orderId);
+            $payment->setLastTransId($transactionId);
             $this->setStore($payment->getOrder()->getStoreId());
             if ($this->__debugMode == 1) {
                 Mage::throwException("XMl=" . $fields_string . "\n\nAccount=" . $this->__accountID . "\n\nSub Account=" . $this->__subAccountID . "\n\nTest Mode=" . $this->__testMode . "\n\nDebuge Mode=" . $this->__debugMode);
@@ -191,12 +202,6 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
         return $this;
     }
    
-    public function capture(Varien_Object $payment, $amount) {
-        
-        // this function is not in used we charged customer credit card in authoriza function/////
-        
-        
-    }
    
     /**
      * Payment refund
@@ -214,7 +219,7 @@ class WorldPayTech_WorldPay_Model_PaymentMethod extends WorldPayTech_WorldPay_Mo
             
                 
             
-                $temp_transaction_id=$payment->getLastTransId();
+                $temp_transaction_id=$payment->getLastTransId()."-";
                 $dash_pos = strpos($temp_transaction_id, "-");
                 $transaction_id=substr($temp_transaction_id,0,$dash_pos);
                 if($transaction_id=="")
@@ -314,16 +319,16 @@ Mage::log('Data '.$fields_string);
     public function cancel(Varien_Object $payment) {
 
         // void the order if canceled
+        
         Mage::log('Order: cancel!');
-
-        return $this;
+		Mage::throwException("Payment Could not be refund, Kindly use Refund Process Using CreditMemo");
     }
 
     public function void(Varien_Object $payment) {
 
 
         Mage::log('Order: void!');
-
+		Mage::throwException("Payment Could not be refund, Kindly use Refund Process Using CreditMemo");
         /* Whatever you call to void a payment in your gateway */
     }
 

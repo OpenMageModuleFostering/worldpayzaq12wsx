@@ -22,6 +22,9 @@ class WorldPayTech_WorldPay_Model_PaymentHelper extends Mage_Paygate_Model_Autho
      * public function can* for each flag respectively
      */
 
+	protected $_canProcess = true;
+
+
     /**
      * Is this payment method a gateway (online auth/charge) ?
      */
@@ -50,7 +53,7 @@ class WorldPayTech_WorldPay_Model_PaymentHelper extends Mage_Paygate_Model_Autho
     /**
      * Can void transactions online?
      */
-    protected $_canVoid = true;
+    protected $_canVoid = false;
 
     /**
      * Can use this payment method in administration panel?
