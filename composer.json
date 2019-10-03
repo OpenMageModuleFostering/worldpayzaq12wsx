@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/worldpayzaq12wsx",
+    "name": "OpenMageModuleFostering\/worldpayzaq12wsx",
     "type": "magento-module",
     "license": "WorldPay-License",
     "homepage": "",
     "description": "WorldPay Payment GateWay",
     "authors": [
-    {
-        "name": "faisal",
-        "email": "faisalsharifshamsi@gmail.com"
-    }
-],
+        {
+            "name": "faisal",
+            "email": "faisalsharifshamsi@gmail.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
